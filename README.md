@@ -1,40 +1,44 @@
+---
+layout: null
+---
 <!-- STEP 1: The Outer Wrapper (Maintains your background color and padding) -->
-<div style="background-color: #94BB86; padding: 40px; font-family: sans-serif; color: #333; line-height: 1.6; border-radius: 10px;">
+<!-- The front matter above (layout: null) tells GitHub to remove the duplicate blue hyperlinked title. -->
+<div style="background-color: #94BB86; padding: 40px; font-family: sans-serif; color: #333; line-height: 1.6; border-radius: 10px; max-width: 900px; margin: 0 auto;">
 
   <!-- STEP 2: The Side-by-Side Flex Container -->
-  <!-- This container holds the image and the header/about text horizontally.
-       'flex-wrap: wrap' ensures it collapses vertically on mobile devices. -->
-  <div style="display: flex; align-items: center; gap: 30px; flex-wrap: wrap; margin-bottom: 30px;">
+  <div style="display: flex; align-items: flex-start; gap: 30px; flex-wrap: wrap; margin-bottom: 30px;">
 
     <!-- STEP 3: The Left-Aligned Image -->
-    <!-- Make sure 'profile.jpg' matches your actual filename. -->
-    <img src="WebsiteHeadshot.png" alt="[Matt Radosevich] Profile Picture" width="180" height="180" style="border-radius: 50%; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex-shrink: 0;">
+    <!-- Removed border-radius and fixed height to keep it an undistorted rectangle. -->
+    <img src="WebsiteHeadshot.png" alt="Matt Radosevich Profile Picture" width="200" style="height: auto; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex-shrink: 0;">
 
     <!-- STEP 4: The Right-Aligned Text Block (Name, Title, About Me) -->
-    <!-- 'flex: 1' allows this text block to fill the remaining space. -->
     <div style="flex: 1; min-width: 280px;">
-      <h1 style="margin-top: 0; font-size: 2.5rem; color: #2c3e50;">Matt Radosevich</h1>
+      <h1 style="margin-top: 0; font-size: 2.5rem; color: #1a252f;">Matt Radosevich</h1>
       <p style="font-size: 1.2rem; margin-bottom: 5px;"><strong>Ph.D. Candidate in Mathematics</strong></p>
-      <p style="margin-top: 0; color: #7f8c8d;"><em>Rice University</em></p>
-      <p><a href="mailto:your.email@university.edu">your.email@university.edu</a> | <a href="https://github.com/MattRadosevich">GitHub Profile</a></p>
+      <p style="margin-top: 0; color: #2c3e50;"><em>Rice University</em></p>
+      <p><a href="mailto:your.email@university.edu" style="color: #1a252f;">your.email@university.edu</a> | <a href="https://github.com/MattRadosevich" style="color: #1a252f;">GitHub Profile</a></p>
 
-      <h2 style="margin-top: 25px; border-bottom: 2px solid #ddd; padding-bottom: 10px;">About Me</h2>
+      <h2 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">About Me</h2>
       <p>Bio here.</p>
     </div>
 
   </div> <!-- End of Side-by-Side Flex Container -->
 
-  <!-- STEP 5: The Rest of Your Content (Standard Markdown) -->
-  <!-- This content flows normally below the side-by-side section. -->
+  <!-- STEP 5: The Rest of Your Content (Converted to HTML to render safely inside the green box) -->
+  
+  <h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Research Interests</h3>
+  <ul>
+    <li>Add here</li>
+  </ul>
 
-  ### Research Interests
-  * Add here
+  <h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Teaching</h3>
+  <ul>
+    <li><strong>Fall 2026:</strong> </li>
+    <li><strong>Spring 2026:</strong> </li>
+  </ul>
 
-  ### Teaching
-  * **Fall 2026:** 
-  * **Spring 2026:** 
-
-  ### Software & Code
-  My code lives on my [GitHub profile](https://github.com/MattRadosevich.
+  <h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Software & Code</h3>
+  <p>My code lives on my <a href="https://github.com/MattRadosevich" style="color: #1a252f; text-decoration: underline;">GitHub profile</a>.</p>
 
 </div> <!-- End of Outer Wrapper -->
