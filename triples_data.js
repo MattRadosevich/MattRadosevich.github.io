@@ -1,13 +1,5 @@
-// Verified transitive Euclidean permutation triples, drawn directly from
-// Examples 1-14 in Radosevich, "Belyi Maps and the Euclidean Triangle Groups"
-// (Dartmouth senior thesis, 2020), section 5. Each has been checked by
-// computer to satisfy sigma_a*sigma_b*sigma_c = identity (composing left to
-// right) and to generate a transitive subgroup of S_d.
-//
-// (Example 15 from the thesis is omitted here: sigma_b and sigma_c appear to
-// be transcribed in swapped order in the thesis's table -- swapping them
-// back does satisfy the identity relation, so it's likely just a typo. Worth
-// checking against your own notes before adding it back in.)
+
+
 const TRIPLES = [
   {
     id: 1,
