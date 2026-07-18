@@ -52,6 +52,20 @@
 
   // ---------- main draw routine ----------
   function draw(canvas, entry, palette) {
+    // Force the positioning that makes this a full-viewport backdrop via
+    // direct inline styles, rather than relying only on the external
+    // stylesheet rule. Inline styles set through the DOM always win the
+    // cascade, so this is the most robust way to guarantee the canvas
+    // stays glued to the viewport and never pushes the page taller --
+    // regardless of anything else going on in the page's CSS.
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.zIndex = '-1';
+    canvas.style.display = 'block';
+    canvas.style.margin = '0';
+    canvas.style.pointerEvents = 'none';
+
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
     const W = window.innerWidth, H = window.innerHeight;
