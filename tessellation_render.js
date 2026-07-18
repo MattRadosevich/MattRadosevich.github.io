@@ -12,7 +12,7 @@
   const TRIPLES = window.TRIPLES;
 
   // ---------- tunables ----------
-  const EDGE_PX = 64;      // on-screen length of the base triangle edge |v_b - v_c|
+  const EDGE_PX = 32;      // on-screen length of the base triangle edge |v_b - v_c|
   const STROKE = 'rgba(0,0,0,0.15)';
 
   // Explicitly lift every other direct child of <body> above the canvas,
@@ -166,14 +166,13 @@
     if (!el) return;
     const [a, b, c] = entry.type;
     el.innerHTML =
-      `This background is generated live from a transitive Euclidean permutation triple ` +
-      `for &Delta;(${a},${b},${c}), giving a subgroup &Gamma; of index <b>d = ${facts.d}</b> ` +
-      `(one tile color per coset). The quotient &#8450;/&Gamma; has genus <b>${facts.genus}</b> ` +
-      `and rotation index <b>${facts.rotationIndex}</b>. ` +
+      `The background of this page visualizes an index <b>d = ${facts.d}</b> subgroup of ` +
+      `the Euclidean triangle group &Delta;(${a},${b},${c}), determined by the permutation triple ` +
       `&sigma;<sub>a</sub> = ${permToString(entry.sigma_a)}, ` +
       `&sigma;<sub>b</sub> = ${permToString(entry.sigma_b)}, ` +
       `&sigma;<sub>c</sub> = ${permToString(entry.sigma_c)} ` +
-      `&mdash; ${entry.source}.`;
+      `&mdash; ${entry.source}.`
+      ;
   }
 
   // The triple + palette are chosen once per page visit, not once per
