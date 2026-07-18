@@ -1,39 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matt Radosevich</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #fafaf7; }
+  #tessellation-bg {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: -1;
+    display: block;
+  }
+  body { padding: 40px 0; box-sizing: border-box; }
+</style>
+</head>
+<body>
+
+<canvas id="tessellation-bg"></canvas>
+
 <!-- STEP 1: The Outer Wrapper (Maintains your background color and padding) -->
 <div style="background-color: #94BB86; padding: 40px; font-family: sans-serif; color: #333; line-height: 1.6; border-radius: 10px; max-width: 900px; margin: 0 auto;">
 
-  <!-- STEP 2: The Side-by-Side Flex Container -->
-  <div style="display: flex; align-items: flex-start; gap: 30px; flex-wrap: wrap; margin-bottom: 30px;">
+<!-- STEP 2: The Side-by-Side Flex Container -->
+<div style="display: flex; align-items: flex-start; gap: 30px; flex-wrap: wrap; margin-bottom: 30px;">
 
-    <!-- STEP 3: The Left-Aligned Image -->
-    <!-- Removed border-radius and fixed height to keep it an undistorted rectangle. -->
-    <img src="WebsiteHeadshot.png" alt="Matt Radosevich Profile Picture" width="200" style="height: auto; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex-shrink: 0;">
+<!-- STEP 3: The Left-Aligned Image -->
+<!-- Removed border-radius and fixed height to keep it an undistorted rectangle. -->
+<img src="WebsiteHeadshot.png" alt="Matt Radosevich Profile Picture" width="200" style="height: auto; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); flex-shrink: 0;">
 
-    <!-- STEP 4: The Right-Aligned Text Block (Name, Title, About Me) -->
-    <div style="flex: 1; min-width: 280px;">
-      <h1 style="margin-top: 0; font-size: 2.5rem; color: #1a252f;">Matt Radosevich</h1>
+<!-- STEP 4: The Right-Aligned Text Block (Name, Title, About Me) -->
+<div style="flex: 1; min-width: 280px;">
+<h1 style="margin-top: 0; font-size: 2.5rem; color: #1a252f;">Matt Radosevich</h1>
+<p>I am a fourth year PhD candidate at Rice University. My advisor is <a href="https://math.rice.edu/~av15/" target="_blank" style="color: #1a252f; text-decoration: underline;"> Anthony Várilly-Alvarado</a>.</p>
+<p>I work on computational problems in arithmetic algebraic geometry.</p>
+<p>My CV is <a href="RadosevichShortCV.pdf" target="_blank" style="color: #1a252f; text-decoration: underline;">here</a>.</p>
+<p> <b>Email:</b> mr111 <i>then</i> "at" <i>then</i> rice.edu</p>
+</div>
+</div> <!-- End of Side-by-Side Flex Container -->
 
-      <p>I am a fourth year PhD candidate at Rice University. My advisor is <a href="https://math.rice.edu/~av15/" target="_blank" style="color: #1a252f; text-decoration: underline;"> Anthony Várilly-Alvarado</a>.</p>
-      <p>I work on computational problems in arithmetic algebraic geometry.</p>
-      <p>My CV is <a href="RadosevichShortCV.pdf" target="_blank" style="color: #1a252f; text-decoration: underline;">here</a>.</p>
-      <p> <b>Email:</b> mr111 <i>then</i> "at" <i>then</i> rice.edu</p>
-    </div>
+<!-- STEP 5: The Rest of Your Content (Converted to HTML to render safely inside the green box) -->
+<h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Publications</h3>
+<ul>
+<li> <a href="https://arxiv.org/abs/2111.07504" target="_blank" style="color: #1a252f; text-decoration: underline;"><i>Computing Euclidean Belyi Maps</i></a> (With <a href="https://jvoight.github.io/" target="_blank" style="color: #1a252f; text-decoration: underline;"> John Voight</a>)</p></li>
+</ul>
+<h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Teaching</h3>
+<ul>
+<li>Math 212 (Multivariable Calculus): Spring 2026, Summer 2025 </li>
+<li>Math 110 (Precalculus Discussion Section): Fall 2025, Fall 2024</li>
+</ul>
+<h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Algorithms & Code</h3>
+<p>My code lives on my <a href="https://github.com/MattRadosevich" target="_blank" style="color: #1a252f; text-decoration: underline;">GitHub profile</a>.</p>
 
-  </div> <!-- End of Side-by-Side Flex Container -->
-
-  <!-- STEP 5: The Rest of Your Content (Converted to HTML to render safely inside the green box) -->
-
-    <h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Publications</h3>
-  <ul>
-    <li> <a href="https://arxiv.org/abs/2111.07504" target="_blank" style="color: #1a252f; text-decoration: underline;"><i>Computing Euclidean Belyi Maps</i></a> (With <a href="https://jvoight.github.io/" target="_blank" style="color: #1a252f; text-decoration: underline;"> John Voight</a>)</p></li>
-  </ul>
-
-  <h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Teaching</h3>
-  <ul>
-    <li>Math 212 (Multivariable Calculus): Spring 2026, Summer 2025 </li>
-    <li>Math 110 (Precalculus Discussion Section): Fall 2025, Fall 2024</li>
-  </ul>
-
-  <h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Algorithms & Code</h3>
-  <p>My code lives on my <a href="https://github.com/MattRadosevich" target="_blank" style="color: #1a252f; text-decoration: underline;">GitHub profile</a>.</p>
+<!-- STEP 6: Blurb describing the background, filled in by tessellation_render.js -->
+<h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">About the background</h3>
+<p id="tessellation-blurb" style="font-size: 0.85rem; color: #333;">Loading&hellip;</p>
 
 </div> <!-- End of Outer Wrapper -->
+
+<script src="triples_data.js"></script>
+<script src="tessellation_core.js"></script>
+<script src="tessellation_render.js"></script>
+
+</body>
+</html>
