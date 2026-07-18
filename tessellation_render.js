@@ -15,6 +15,24 @@
   const EDGE_PX = 64;      // on-screen length of the base triangle edge |v_b - v_c|
   const STROKE = 'rgba(0,0,0,0.15)';
 
+  // Explicitly lift every other direct child of <body> above the canvas,
+  // rather than relying on the canvas having a negative z-index. This is
+  // done generically (not by looking for a specific id/class) so it keeps
+  // working even if the page's content wrapper changes shape later.
+  function ensureContentAboveBackground() {
+    for (const el of document.body.children) {
+      if (el.id === 'tessellation-bg') continue;
+      const computedPosition = getComputedStyle(el).position;
+      if (computedPosition === 'static') {
+        el.style.position = 'relative';
+      }
+      const currentZ = parseInt(getComputedStyle(el).zIndex, 10);
+      if (isNaN(currentZ) || currentZ < 1) {
+        el.style.zIndex = '1';
+      }
+    }
+  }
+
   // ---------- pick today's triple + palette ----------
   function pickTriple() {
     return TRIPLES[Math.floor(Math.random() * TRIPLES.length)];
@@ -58,13 +76,22 @@
     // cascade, so this is the most robust way to guarantee the canvas
     // stays glued to the viewport and never pushes the page taller --
     // regardless of anything else going on in the page's CSS.
+    //
+    // Deliberately z-index: 0 here, NOT a negative value. Negative
+    // z-index depends on how the browser treats the <html>/<body>
+    // background as a special bottom-most paint layer outside normal
+    // stacking, which is a genuinely inconsistent corner of the CSS
+    // spec across browsers. The robust pattern is the opposite: keep
+    // this at an ordinary stacking level and explicitly lift the
+    // content above it instead (see ensureContentAboveBackground below).
     canvas.style.position = 'fixed';
     canvas.style.top = '0';
     canvas.style.left = '0';
-    canvas.style.zIndex = '-1';
+    canvas.style.zIndex = '0';
     canvas.style.display = 'block';
     canvas.style.margin = '0';
     canvas.style.pointerEvents = 'none';
+    ensureContentAboveBackground();
 
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
