@@ -171,7 +171,6 @@
       `&sigma;<sub>a</sub> = ${permToString(entry.sigma_a)}, ` +
       `&sigma;<sub>b</sub> = ${permToString(entry.sigma_b)}, ` +
       `&sigma;<sub>c</sub> = ${permToString(entry.sigma_c)} ` +
-      `&mdash; ${entry.source}.`
       `Hit "Refresh" to see a new one!`
       ;
   }
