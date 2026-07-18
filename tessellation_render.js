@@ -12,8 +12,47 @@
   const TRIPLES = window.TRIPLES;
 
   // ---------- tunables ----------
-  const EDGE_PX = 32;      // on-screen length of the base triangle edge |v_b - v_c|
   const STROKE = 'rgba(0,0,0,0.15)';
+
+  // On-screen edge length scales with the triple's index d: small-index
+  // examples (few tiles) use big triangles so they read clearly; as d
+  // climbs toward EDGE_MAX_D, triangles shrink so more of the underlying
+  // structure is visible on screen at once.
+  const EDGE_MIN_D = 4, EDGE_MAX_D = 30;
+  const EDGE_MAX_PX = 64, EDGE_MIN_PX = 16;
+
+  function idealEdgePx(d) {
+    if (d <= EDGE_MIN_D) return EDGE_MAX_PX;
+    if (d >= EDGE_MAX_D) return EDGE_MIN_PX;
+    const t = (d - EDGE_MIN_D) / (EDGE_MAX_D - EDGE_MIN_D);
+    return EDGE_MAX_PX + (EDGE_MIN_PX - EDGE_MAX_PX) * t;
+  }
+
+  // Exact tile-pair (shaded+unshaded) area for each tessellation type, used
+  // to estimate how many tiles a given edge length would need for a given
+  // viewport, so we can back off *before* generating them rather than
+  // truncating a half-built tessellation (which leaves ugly gaps -- ask for
+  // fewer, bigger tiles instead of cutting off the same tile count early).
+  const TILE_AREA = { '3,3,3': 0.866, '2,4,4': 0.5, '2,3,6': 0.433 };
+  const TILE_BUDGET = 25000; // keeps BFS+draw comfortably under ~150ms even on 4K/ultrawide
+
+  function estimatedTiles(edgePx, type, W, H) {
+    const area = TILE_AREA[type.join(',')];
+    const halfW = (W / 2) / edgePx + 1.5, halfH = (H / 2) / edgePx + 1.5;
+    const radius = Math.sqrt(halfW * halfW + halfH * halfH);
+    return (Math.PI * radius * radius / area) * 1.3; // headroom: BFS frontier isn't a perfect disc
+  }
+
+  // Ideal edge length for this d, bumped up (bigger, fewer triangles) only
+  // if the straightforward choice would blow past the tile budget for this
+  // screen -- e.g. a d=30 example on a 4K monitor. Ordinary screens at
+  // ordinary d never get touched by this.
+  function edgePxForViewport(d, type, W, H) {
+    const ideal = idealEdgePx(d);
+    const est = estimatedTiles(ideal, type, W, H);
+    if (est <= TILE_BUDGET) return ideal;
+    return ideal * Math.sqrt(est / TILE_BUDGET);
+  }
 
   // Explicitly lift every other direct child of <body> above the canvas,
   // rather than relying on the canvas having a negative z-index. This is
@@ -104,6 +143,7 @@
 
     const [a, b, c] = entry.type;
     const sigma = buildSigma(entry);
+    const EDGE_PX = edgePxForViewport(entry.d, entry.type, W, H);
 
     // Screen (px, origin top-left, y-down) <-> world (unit complex plane, y-up).
     const cx = W / 2, cy = H / 2;
@@ -123,7 +163,10 @@
     // wide monitors. The densest of the three tessellations (2,3,6) packs
     // roughly 1 tile per 0.43 unit^2; we use 0.35 to stay safely under that,
     // plus 60% extra headroom since graph-distance in the BFS doesn't track
-    // Euclidean distance exactly.
+    // Euclidean distance exactly. (This is deliberately generous, unlike
+    // the budget check above -- once we've committed to an edge length, we
+    // want this tessellation to actually finish covering the screen rather
+    // than stop partway and leave gaps.)
     const halfW = Math.max(Math.abs(bbox.xmin), Math.abs(bbox.xmax)) + 1.5;
     const halfH = Math.max(Math.abs(bbox.ymin), Math.abs(bbox.ymax)) + 1.5;
     const radius = Math.sqrt(halfW * halfW + halfH * halfH);
@@ -154,30 +197,27 @@
         ctx.stroke();
       }
     }
-
-    return M.computeFacts(a, b, c, sigma, entry.d);
   }
 
   function cycleToString(cyc) { return '(' + cyc.join(' ') + ')'; }
   function permToString(cycles) { return cycles.map(cycleToString).join(''); }
 
-  function writeBlurb(entry, facts) {
+  function writeBlurb(entry) {
     const el = document.getElementById('tessellation-blurb');
     if (!el) return;
     const [a, b, c] = entry.type;
     el.innerHTML =
-      `The background of this page visualizes an index <b>d = ${facts.d}</b> subgroup of ` +
+      `The background of this page visualizes an index <b>d = ${entry.d}</b> subgroup of ` +
       `the Euclidean triangle group &Delta;(${a},${b},${c}), determined by the permutation triple ` +
       `&sigma;<sub>a</sub> = ${permToString(entry.sigma_a)}, ` +
       `&sigma;<sub>b</sub> = ${permToString(entry.sigma_b)}, ` +
-      `&sigma;<sub>c</sub> = ${permToString(entry.sigma_c)} ` +
-      `Hit "Refresh" to see a new one!`
-      ;
+      `&sigma;<sub>c</sub> = ${permToString(entry.sigma_c)}.`;
   }
 
   // The triple + palette are chosen once per page visit, not once per
   // render call, so that resizing the window redraws the *same* pattern
-  // to fit the new size rather than reshuffling colors mid-visit.
+  // to fit the new size rather than reshuffling colors mid-visit. A
+  // manual shuffle (see wireControls) resets both and re-renders.
   let currentEntry = null;
   let currentPalette = null;
 
@@ -188,8 +228,39 @@
       currentEntry = pickTriple();
       currentPalette = randomPalette(currentEntry.d);
     }
-    const facts = draw(canvas, currentEntry, currentPalette);
-    writeBlurb(currentEntry, facts);
+    draw(canvas, currentEntry, currentPalette);
+    writeBlurb(currentEntry);
+  }
+
+  // ---------- info-box toggle + shuffle controls ----------
+  // These live in their own always-present container (a sibling of the
+  // info box, not nested inside it), so they stay reachable even when the
+  // info box itself is hidden -- otherwise there'd be no way to bring it
+  // back once it's gone.
+  function wireControls() {
+    const infoBox = document.getElementById('info-box');
+    const toggleLink = document.getElementById('toggle-info-link');
+    const shuffleLink = document.getElementById('shuffle-link');
+
+    if (infoBox && toggleLink) {
+      toggleLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const nowHidden = infoBox.style.display !== 'none';
+        infoBox.style.display = nowHidden ? 'none' : '';
+        toggleLink.textContent = nowHidden
+          ? 'Click here to unhide personal info'
+          : 'Click here to hide personal info';
+      });
+    }
+
+    if (shuffleLink) {
+      shuffleLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentEntry = null;
+        currentPalette = null;
+        render();
+      });
+    }
   }
 
   // Redraw on resize, debounced so we don't rebuild the whole tessellation
@@ -200,9 +271,14 @@
     resizeTimer = setTimeout(render, 150);
   });
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', render);
-  } else {
+  function init() {
+    wireControls();
     render();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 })();
