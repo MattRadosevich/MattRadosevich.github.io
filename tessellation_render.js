@@ -85,16 +85,59 @@
     };
   }
 
-  // Evenly-spaced random hues around the color wheel, so every triangle
-  // color is easy to tell apart no matter how many there are.
+  // Earth-tone palette: rust, sienna, terracotta, ochre, olive, moss,
+  // saddle brown, and dried-husk gold -- the color range of dried
+  // corn kernels -- plus a handful of dusty blue-greys to balance out all
+  // the warm reds/oranges, and a couple of neutral outliers (dark grey,
+  // near-cream). Anchored to real reference colors (as HSL) rather than a
+  // free-floating hue/sat/light formula: an earlier version of this that
+  // just picked random hue/sat/light within a "warm" range drifted into
+  // pink at high lightness and neon yellow-green at high saturation.
+  // Jittering around real reference points avoids that reliably.
+  const EARTH_TONE_ANCHORS = [
+    [18, 49, 46],   // sienna
+    [15, 56, 41],   // rust / burnt orange
+    [8, 44, 56],    // terracotta
+    [42, 56, 53],   // ochre / goldenrod
+    [80, 39, 40],   // olive drab
+    [85, 29, 34],   // dark moss green
+    [25, 49, 35],   // saddle brown
+    [355, 39, 38],  // deep rusty maroon
+    [34, 29, 70],   // tan
+    [40, 34, 76],   // pale wheat / dried-husk gold
+    [20, 49, 30],   // dark chocolate brown
+    [95, 22, 48],   // sage / grayed moss
+    [210, 22, 48],  // slate blue-grey
+    [200, 26, 58],  // dusty steel blue
+    [220, 20, 38],  // deeper denim blue-grey
+    [30, 8, 30],    // dark grey (neutral outlier)
+    [42, 20, 87],   // near-cream (light outlier)
+  ];
+
   function randomPalette(d) {
-    const h0 = Math.random() * 360;
-    const sat = 55 + Math.random() * 25;   // 55-80%
-    const light = 55 + Math.random() * 12; // 55-67%
+    // Shuffle a copy of the anchor list before assigning colors, not just
+    // the finished colors afterward -- otherwise a small-d example (say
+    // d=4) would always draw its 4 colors from the same fixed prefix of
+    // the list (sienna/rust/terracotta/ochre, every single time) and the
+    // blue-greys and outliers near the end would never appear at all.
+    const shuffledAnchors = EARTH_TONE_ANCHORS.slice();
+    for (let i = shuffledAnchors.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffledAnchors[i], shuffledAnchors[j]] = [shuffledAnchors[j], shuffledAnchors[i]];
+    }
     const colors = [];
     for (let i = 0; i < d; i++) {
-      const h = (h0 + (360 * i) / d) % 360;
-      colors.push(`hsl(${h.toFixed(1)}, ${sat.toFixed(0)}%, ${light.toFixed(0)}%)`);
+      const [h0, s0, l0] = shuffledAnchors[i % shuffledAnchors.length];
+      const h = (h0 + (Math.random() - 0.5) * 10 + 360) % 360;
+      const s = Math.max(8, Math.min(62, s0 + (Math.random() - 0.5) * 14));
+      const l = Math.max(25, Math.min(92, l0 + (Math.random() - 0.5) * 10));
+      colors.push(`hsl(${h.toFixed(1)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`);
+    }
+    // Shuffle again so which anchor lands on which specific tile label is
+    // independent of the (already-shuffled) anchor order above.
+    for (let i = colors.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [colors[i], colors[j]] = [colors[j], colors[i]];
     }
     return colors;
   }
