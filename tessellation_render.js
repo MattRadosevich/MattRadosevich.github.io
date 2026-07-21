@@ -291,8 +291,8 @@
         const nowHidden = infoBox.style.display !== 'none';
         infoBox.style.display = nowHidden ? 'none' : '';
         toggleLink.textContent = nowHidden
-          ? 'Click here to unhide personal info'
-          : 'Click here to hide personal info';
+          ? 'Click here to unhide info box'
+          : 'Click here for full-screen wallpaper';
       });
     }
 

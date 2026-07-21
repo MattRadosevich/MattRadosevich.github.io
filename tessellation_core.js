@@ -1,6 +1,5 @@
 // ============================================================
 // Core math engine for Euclidean-triangle-group wallpaper art.
-// Pure logic, no DOM/canvas — testable head­lessly in Node.
 // ============================================================
 
 // ---- complex number helpers: represented as {re, im} ----
