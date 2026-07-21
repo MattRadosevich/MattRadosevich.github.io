@@ -22,8 +22,8 @@
 
 <canvas id="tessellation-bg"></canvas>
 
-<!-- STEP 1: The Outer Wrapper (Maintains your background color and padding) -->
-<div id="info-box" style="position: relative; z-index: 1; background-color: #94BB86; padding: 40px; font-family: sans-serif; color: #333; line-height: 1.6; border-radius: 10px; max-width: 900px; margin: 0 auto;">
+<!-- STEP 1: The Outer Wrapper (Maintains background color and padding) -->
+<div style="position: relative; z-index: 1; background-color: #94BB86; padding: 40px; font-family: sans-serif; color: #333; line-height: 1.6; border-radius: 10px; max-width: 900px; margin: 0 auto;">
 
 <!-- STEP 2: The Side-by-Side Flex Container -->
 <div style="display: flex; align-items: flex-start; gap: 30px; flex-wrap: wrap; margin-bottom: 30px;">
@@ -35,14 +35,13 @@
 <!-- STEP 4: The Right-Aligned Text Block (Name, Title, About Me) -->
 <div style="flex: 1; min-width: 280px;">
 <h1 style="margin-top: 0; font-size: 2.5rem; color: #1a252f;">Matt Radosevich</h1>
-<p>I am a fourth year PhD candidate at Rice University. My advisor is <a href="https://math.rice.edu/~av15/" target="_blank" style="color: #1a252f; text-decoration: underline;"> Anthony Várilly-Alvarado</a>.</p>
-<p>I work on computational problems in arithmetic algebraic geometry.</p>
+<p>I am a fourth year PhD candidate at Rice University working in arithmetic algebraic geometry. My advisor is <a href="https://math.rice.edu/~av15/" target="_blank" style="color: #1a252f; text-decoration: underline;"> Anthony Várilly-Alvarado</a>.</p>
 <p>My CV is <a href="RadosevichShortCV.pdf" target="_blank" style="color: #1a252f; text-decoration: underline;">here</a>.</p>
-<p> <b>Email:</b> mr111 <i>then</i> "at" <i>then</i> rice.edu</p>
+<p> <b>Email:</b> mr111 [at]  rice [dot] edu</p>
 </div>
 </div> <!-- End of Side-by-Side Flex Container -->
 
-<!-- STEP 5: The Rest of Your Content (Converted to HTML to render safely inside the green box) -->
+<!-- STEP 5: The Rest of the Content (Converted to HTML to render safely inside the green box) -->
 <h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Publications</h3>
 <ul>
 <li> <a href="https://arxiv.org/abs/2111.07504" target="_blank" style="color: #1a252f; text-decoration: underline;"><i>Computing Euclidean Belyi Maps</i></a> (With <a href="https://jvoight.github.io/" target="_blank" style="color: #1a252f; text-decoration: underline;"> John Voight</a>)</p></li>
@@ -53,23 +52,13 @@
 <li>Math 110 (Precalculus Discussion Section): Fall 2025, Fall 2024</li>
 </ul>
 <h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">Algorithms & Code</h3>
-<p>My code lives on my <a href="https://github.com/MattRadosevich" target="_blank" style="color: #1a252f; text-decoration: underline;">GitHub profile</a>.</p>
+<p>My code lives on my <a href="https://github.com/MattRadosevich" target="_blank" style="color: #1a252f; text-decoration: underline;">GitHub page</a>.</p>
 
 <!-- STEP 6: Blurb describing the background, filled in by tessellation_render.js -->
 <h3 style="margin-top: 25px; border-bottom: 2px solid #6b8e5f; padding-bottom: 10px;">About the background</h3>
 <p id="tessellation-blurb" style="font-size: 0.85rem; color: #333;">Loading&hellip;</p>
 
 </div> <!-- End of Outer Wrapper -->
-
-<!-- Controls for the background: these live outside #info-box on purpose,
-     so they're still reachable even when the box above is hidden. -->
-<div id="tessellation-controls" style="position: relative; z-index: 1; max-width: 900px; margin: 14px auto 0; text-align: center; font-family: sans-serif; font-size: 0.85rem;">
-<span style="background: rgba(255,255,255,0.85); padding: 6px 16px; border-radius: 20px; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
-<a href="#" id="toggle-info-link" style="color: #1a252f; text-decoration: underline;">Click here to hide personal info</a>
-&nbsp;&nbsp;|&nbsp;&nbsp;
-<a href="#" id="shuffle-link" style="color: #1a252f; text-decoration: underline;">Shuffle Wallpaper</a>
-</span>
-</div>
 
 <script src="triples_data.js"></script>
 <script src="tessellation_core.js"></script>
