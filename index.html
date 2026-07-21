@@ -60,6 +60,16 @@
 
 </div> <!-- End of Outer Wrapper -->
 
+<!-- Controls for the background: these live outside #info-box on purpose,
+     so they're still reachable even when the box above is hidden. -->
+<div id="tessellation-controls" style="position: relative; z-index: 1; max-width: 900px; margin: 14px auto 0; text-align: center; font-family: sans-serif; font-size: 0.85rem;">
+<span style="background: rgba(255,255,255,0.85); padding: 6px 16px; border-radius: 20px; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+<a href="#" id="toggle-info-link" style="color: #1a252f; text-decoration: underline;">Click here for full-screen wallpaper</a>
+&nbsp;&nbsp;|&nbsp;&nbsp;
+<a href="#" id="shuffle-link" style="color: #1a252f; text-decoration: underline;">Shuffle Wallpaper</a>
+</span>
+</div>
+
 <script src="triples_data.js"></script>
 <script src="tessellation_core.js"></script>
 <script src="tessellation_render.js"></script>
