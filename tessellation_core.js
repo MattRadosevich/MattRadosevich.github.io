@@ -1,5 +1,6 @@
 // ============================================================
 // Core math engine for Euclidean-triangle-group wallpaper art.
+// Pure logic, no DOM/canvas — testable head­lessly in Node.
 // ============================================================
 
 // ---- complex number helpers: represented as {re, im} ----
@@ -133,7 +134,14 @@ function generateTiles(a, b, c, sigma, bbox, opts) {
     p.im >= bbox.ymin - margin && p.im <= bbox.ymax + margin
   );
 
-  const key = (omega,beta) => [omega.re,omega.im,beta.re,beta.im].map(x=>x.toFixed(4)).join(',');
+  // Values that are essentially zero (either exactly -0, or tiny floating-
+  // point noise like -1.1e-16 from accumulated rotations) must be
+  // normalized before formatting -- (-1.1e-16).toFixed(4) is the string
+  // "-0.0000" while (+1.3e-16).toFixed(4) is "0.0000". Two numerically
+  // identical tile positions reached via different BFS paths can land on
+  // opposite sides of that sign, silently defeating deduplication.
+  const cleanZero = (x) => (Math.abs(x) < 1e-9 ? 0 : x);
+  const key = (omega,beta) => [omega.re,omega.im,beta.re,beta.im].map(x=>cleanZero(x).toFixed(4)).join(',');
   const start = {omega:{re:1,im:0}, beta:{re:0,im:0}, label:1};
   const seen = new Set([key(start.omega,start.beta)]);
   const queue = [start];

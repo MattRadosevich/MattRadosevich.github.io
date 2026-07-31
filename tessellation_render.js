@@ -86,7 +86,7 @@
   }
 
   // Earth-tone palette: rust, sienna, terracotta, ochre, olive, moss,
-  // saddle brown, and dried-husk gold -- the color range of dried
+  // saddle brown, and dried-husk gold -- the color range of dried/Indian
   // corn kernels -- plus a handful of dusty blue-greys to balance out all
   // the warm reds/oranges, and a couple of neutral outliers (dark grey,
   // near-cream). Anchored to real reference colors (as HSL) rather than a
@@ -216,7 +216,12 @@
     const cap = Math.max(1500, Math.ceil((Math.PI * radius * radius / 0.35) * 1.6));
 
     const { tiles, geo } = M.generateTiles(a, b, c, sigma, bbox, { margin: 1.5, cap });
-    const vcReflected = reflectPoint(geo.v.c, geo.v.a, geo.v.b);
+    // Each tile pairs the reference triangle with its mirror image across one
+    // of its own edges -- any choice gives a valid fundamental domain for
+    // Delta. Reflecting across the a-c edge (rather than a-b) makes the
+    // (2,3,6) tiles come out as equilateral triangles instead of 30-30-120
+    // ones, which is the convention used in the original thesis figures.
+    const vbReflected = reflectPoint(geo.v.b, geo.v.a, geo.v.c);
 
     ctx.clearRect(0, 0, W, H);
     ctx.lineWidth = 1;
@@ -225,10 +230,10 @@
     for (const tile of tiles) {
       const transform = (v) => M.C.add(M.C.mul(tile.omega, v), tile.beta);
       const pa = transform(geo.v.a), pb = transform(geo.v.b), pc = transform(geo.v.c);
-      const pcRefl = transform(vcReflected);
+      const pbRefl = transform(vbReflected);
       const color = palette[(tile.label - 1) % entry.d];
 
-      for (const tri of [[pa, pb, pc], [pa, pb, pcRefl]]) {
+      for (const tri of [[pa, pb, pc], [pa, pc, pbRefl]]) {
         const pts = tri.map(toScreen);
         ctx.beginPath();
         ctx.moveTo(pts[0].x, pts[0].y);
@@ -291,8 +296,8 @@
         const nowHidden = infoBox.style.display !== 'none';
         infoBox.style.display = nowHidden ? 'none' : '';
         toggleLink.textContent = nowHidden
-          ? 'Click here to unhide info box'
-          : 'Click here for full-screen wallpaper';
+          ? 'Click here to unhide personal info'
+          : 'Click here to hide personal info';
       });
     }
 
