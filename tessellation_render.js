@@ -95,9 +95,9 @@
   const EARTH_ANCHORS = [
     [0, 50, 42],    // brick red
     [30, 50, 50],   // rust
-    [55, 50, 38],   // ochre
+    [360, 52, 64],   // salmon
     [85, 28, 41],   // olive
-    [203, 42, 46],  // grey blue
+    [203, 34, 67],  // grey blue
     [34, 30, 66],   // tan
     [38, 24, 74],   // wheat
     [30, 8, 28],    // dark grey (neutral outlier)
