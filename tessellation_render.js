@@ -85,61 +85,73 @@
     };
   }
 
-  // Earth-tone palette: rust, sienna, terracotta, ochre, olive, moss,
-  // saddle brown, and dried-husk gold -- the color range of dried/Indian
-  // corn kernels -- plus a handful of dusty blue-greys to balance out all
-  // the warm reds/oranges, and a couple of neutral outliers (dark grey,
-  // near-cream). Anchored to real reference colors (as HSL) rather than a
-  // free-floating hue/sat/light formula: an earlier version of this that
-  // just picked random hue/sat/light within a "warm" range drifted into
-  // pink at high lightness and neon yellow-green at high saturation.
-  // Jittering around real reference points avoids that reliably.
-  const EARTH_TONE_ANCHORS = [
-    [18, 49, 46],   // sienna
-    [15, 56, 41],   // rust / burnt orange
-    [8, 44, 56],    // terracotta
-    [42, 56, 53],   // ochre / goldenrod
-    [80, 39, 40],   // olive drab
-    [85, 29, 34],   // dark moss green
-    [25, 49, 35],   // saddle brown
-    [355, 39, 38],  // deep rusty maroon
-    [34, 29, 70],   // tan
-    [40, 34, 76],   // pale wheat / dried-husk gold
-    [20, 49, 30],   // dark chocolate brown
-    [95, 22, 48],   // sage / grayed moss
-    [210, 22, 48],  // slate blue-grey
-    [200, 26, 58],  // dusty steel blue
-    [220, 20, 38],  // deeper denim blue-grey
-    [30, 8, 30],    // dark grey (neutral outlier)
-    [42, 20, 87],   // near-cream (light outlier)
+  // Two-tier palette: EARTH_ANCHORS are tried first (and are all that's
+  // used for d <= 10, matching the classic earth-tone look), and
+  // EXPANDED_ANCHORS only get pulled in once d exceeds what the earth
+  // tones alone can keep distinguishable. Anchored to real reference
+  // colors (as HSL) rather than a free-floating hue/sat/light formula: an
+  // earlier version that just picked random hue/sat/light within a "warm"
+  // range drifted into pink at high lightness and neon yellow-green at
+  // high saturation. Jittering around real reference points avoids that.
+  const EARTH_ANCHORS = [
+    [0, 50, 42],    // brick red
+    [30, 50, 50],   // rust
+    [55, 50, 38],   // ochre
+    [85, 42, 48],   // olive
+    [115, 40, 36],  // moss
+    [34, 30, 66],   // tan
+    [38, 24, 74],   // wheat
+    [30, 8, 28],    // dark grey (neutral outlier)
+    [44, 16, 89],   // near-cream (light outlier)
+    [20, 45, 24],   // dark chocolate
+  ];
+  const EXPANDED_ANCHORS = [
+    [150, 38, 46],  // teal-green
+    [180, 40, 34],  // dusty teal
+    [210, 42, 50],  // steel blue
+    [240, 38, 36],  // slate blue
+    [270, 36, 48],  // violet
+    [298, 42, 34],  // plum
+    [335, 46, 44],  // wine
   ];
 
-  function randomPalette(d) {
-    // Shuffle a copy of the anchor list before assigning colors, not just
-    // the finished colors afterward -- otherwise a small-d example (say
-    // d=4) would always draw its 4 colors from the same fixed prefix of
-    // the list (sienna/rust/terracotta/ochre, every single time) and the
-    // blue-greys and outliers near the end would never appear at all.
-    const shuffledAnchors = EARTH_TONE_ANCHORS.slice();
-    for (let i = shuffledAnchors.length - 1; i > 0; i--) {
+  function shuffled(arr) {
+    const out = arr.slice();
+    for (let i = out.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [shuffledAnchors[i], shuffledAnchors[j]] = [shuffledAnchors[j], shuffledAnchors[i]];
+      [out[i], out[j]] = [out[j], out[i]];
     }
+    return out;
+  }
+
+  // A tile's mirror triangle keeps the same hue as its colored partner but
+  // desaturated and lightened, so the pair reads as "the same color, two
+  // intensities" -- distinct enough to see the tile boundary, but clearly
+  // related rather than an unrelated neutral grey.
+  function mutedHsl(h, s, l) {
+    const s2 = s * 0.55;
+    const l2 = l + (88 - l) * 0.30;
+    return `hsl(${h.toFixed(1)}, ${s2.toFixed(0)}%, ${l2.toFixed(0)}%)`;
+  }
+
+  function randomPalette(d) {
+    // Earth tones first, expanded hues appended only as needed -- so a
+    // low-d example (big triangles) stays purely earth-toned, and the
+    // wider hue range only shows up once there are enough tiles that pure
+    // earth tones alone would start repeating too closely to stay
+    // distinguishable once paired with a muted companion.
+    const pool = shuffled(EARTH_ANCHORS).concat(shuffled(EXPANDED_ANCHORS));
     const colors = [];
     for (let i = 0; i < d; i++) {
-      const [h0, s0, l0] = shuffledAnchors[i % shuffledAnchors.length];
+      const [h0, s0, l0] = pool[i % pool.length];
       const h = (h0 + (Math.random() - 0.5) * 10 + 360) % 360;
-      const s = Math.max(8, Math.min(62, s0 + (Math.random() - 0.5) * 14));
-      const l = Math.max(25, Math.min(92, l0 + (Math.random() - 0.5) * 10));
-      colors.push(`hsl(${h.toFixed(1)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`);
+      const s = Math.max(8, Math.min(62, s0 + (Math.random() - 0.5) * 10));
+      const l = Math.max(20, Math.min(92, l0 + (Math.random() - 0.5) * 8));
+      colors.push({ main: `hsl(${h.toFixed(1)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`, muted: mutedHsl(h, s, l) });
     }
-    // Shuffle again so which anchor lands on which specific tile label is
-    // independent of the (already-shuffled) anchor order above.
-    for (let i = colors.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [colors[i], colors[j]] = [colors[j], colors[i]];
-    }
-    return colors;
+    // Shuffle so which anchor lands on which specific tile label is
+    // independent of the (already-shuffled) pool order above.
+    return shuffled(colors);
   }
 
   function reflectPoint(p, a, b) {
@@ -151,7 +163,7 @@
   }
 
   // ---------- main draw routine ----------
-  function draw(canvas, entry, palette) {
+  function draw(canvas, entry, palette, reflectChoice) {
     // Force the positioning that makes this a full-viewport backdrop via
     // direct inline styles, rather than relying only on the external
     // stylesheet rule. Inline styles set through the DOM always win the
@@ -216,12 +228,19 @@
     const cap = Math.max(1500, Math.ceil((Math.PI * radius * radius / 0.35) * 1.6));
 
     const { tiles, geo } = M.generateTiles(a, b, c, sigma, bbox, { margin: 1.5, cap });
-    // Each tile pairs the reference triangle with its mirror image across one
-    // of its own edges -- any choice gives a valid fundamental domain for
-    // Delta. Reflecting across the a-c edge (rather than a-b) makes the
-    // (2,3,6) tiles come out as equilateral triangles instead of 30-30-120
-    // ones, which is the convention used in the original thesis figures.
-    const vbReflected = reflectPoint(geo.v.b, geo.v.a, geo.v.c);
+
+    // Each tile pairs the reference triangle with its mirror image across
+    // ONE of its own three edges -- any of the three gives an equally
+    // valid fundamental domain for Delta, they just look different.
+    // Reflecting the vertex opposite a given edge produces a different
+    // tile shape each time (e.g. for (2,3,6): reflecting across b-c gives
+    // equilateral triangles, a-b gives 30-30-120 ones, a-c gives a genuine
+    // quadrilateral kite -- see the "unshared" vertex names below). Picked
+    // fresh per rendering (see reflectChoice below), so which convention
+    // shows up is part of the random variety between page loads.
+    const OTHER_VERTICES = { a: ['b', 'c'], b: ['a', 'c'], c: ['a', 'b'] };
+    const [u1, u2] = OTHER_VERTICES[reflectChoice];
+    const reflectedRef = reflectPoint(geo.v[reflectChoice], geo.v[u1], geo.v[u2]);
 
     ctx.clearRect(0, 0, W, H);
     ctx.lineWidth = 1;
@@ -230,17 +249,20 @@
     for (const tile of tiles) {
       const transform = (v) => M.C.add(M.C.mul(tile.omega, v), tile.beta);
       const pa = transform(geo.v.a), pb = transform(geo.v.b), pc = transform(geo.v.c);
-      const pbRefl = transform(vbReflected);
-      const color = palette[(tile.label - 1) % entry.d];
+      const pRefl = transform(reflectedRef);
+      const verts = { a: pa, b: pb, c: pc };
+      const colorPair = palette[(tile.label - 1) % entry.d];
 
-      for (const tri of [[pa, pb, pc], [pa, pc, pbRefl]]) {
-        const pts = tri.map(toScreen);
+      const triangles = [[pa, pb, pc], [verts[u1], verts[u2], pRefl]];
+      const fills = [colorPair.main, colorPair.muted];
+      for (let i = 0; i < triangles.length; i++) {
+        const pts = triangles[i].map(toScreen);
         ctx.beginPath();
         ctx.moveTo(pts[0].x, pts[0].y);
         ctx.lineTo(pts[1].x, pts[1].y);
         ctx.lineTo(pts[2].x, pts[2].y);
         ctx.closePath();
-        ctx.fillStyle = color;
+        ctx.fillStyle = fills[i];
         ctx.fill();
         ctx.stroke();
       }
@@ -262,12 +284,15 @@
       `&sigma;<sub>c</sub> = ${permToString(entry.sigma_c)}.`;
   }
 
-  // The triple + palette are chosen once per page visit, not once per
-  // render call, so that resizing the window redraws the *same* pattern
-  // to fit the new size rather than reshuffling colors mid-visit. A
-  // manual shuffle (see wireControls) resets both and re-renders.
+  // The triple + palette + tile-pairing edge are chosen once per page
+  // visit, not once per render call, so that resizing the window redraws
+  // the *same* pattern to fit the new size rather than reshuffling
+  // mid-visit. A manual shuffle (see wireControls) resets all three and
+  // re-renders.
   let currentEntry = null;
   let currentPalette = null;
+  let currentReflectChoice = null;
+  const REFLECT_CHOICES = ['a', 'b', 'c'];
 
   function render() {
     const canvas = document.getElementById('tessellation-bg');
@@ -275,8 +300,9 @@
     if (!currentEntry) {
       currentEntry = pickTriple();
       currentPalette = randomPalette(currentEntry.d);
+      currentReflectChoice = REFLECT_CHOICES[Math.floor(Math.random() * REFLECT_CHOICES.length)];
     }
-    draw(canvas, currentEntry, currentPalette);
+    draw(canvas, currentEntry, currentPalette, currentReflectChoice);
     writeBlurb(currentEntry);
   }
 
@@ -306,6 +332,7 @@
         e.preventDefault();
         currentEntry = null;
         currentPalette = null;
+        currentReflectChoice = null;
         render();
       });
     }
