@@ -85,22 +85,16 @@
     };
   }
 
-  // Earth-tone palette: rust, ochre, olive, moss, tan, wheat, near-cream,
-  // dark grey, and dark chocolate -- the color range of dried/Indian corn
-  // kernels. Anchored to real reference colors (as HSL) rather than a
-  // free-floating hue/sat/light formula: an earlier version that just
-  // picked random hue/sat/light within a "warm" range drifted into pink
-  // at high lightness and neon yellow-green at high saturation.
-  // Jittering around real reference points avoids that reliably.
+
   const EARTH_ANCHORS = [
     [0, 50, 42],    // brick red
     [30, 50, 50],   // rust
-    [360, 52, 64],   // salmon
+    [76, 23, 65],   // light sage
     [85, 28, 41],   // olive
     [203, 34, 67],  // grey blue
     [34, 30, 66],   // tan
     [38, 24, 74],   // wheat
-    [30, 8, 28],    // dark grey (neutral outlier)
+    [30, 8, 40],    // dark grey (neutral outlier)
     [44, 16, 89],   // near-cream (light outlier)
     [20, 45, 24],   // dark chocolate
   ];
