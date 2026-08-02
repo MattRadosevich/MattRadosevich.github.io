@@ -85,14 +85,13 @@
     };
   }
 
-  // Two-tier palette: EARTH_ANCHORS are tried first (and are all that's
-  // used for d <= 10, matching the classic earth-tone look), and
-  // EXPANDED_ANCHORS only get pulled in once d exceeds what the earth
-  // tones alone can keep distinguishable. Anchored to real reference
-  // colors (as HSL) rather than a free-floating hue/sat/light formula: an
-  // earlier version that just picked random hue/sat/light within a "warm"
-  // range drifted into pink at high lightness and neon yellow-green at
-  // high saturation. Jittering around real reference points avoids that.
+  // Earth-tone palette: rust, ochre, olive, moss, tan, wheat, near-cream,
+  // dark grey, and dark chocolate -- the color range of dried/Indian corn
+  // kernels. Anchored to real reference colors (as HSL) rather than a
+  // free-floating hue/sat/light formula: an earlier version that just
+  // picked random hue/sat/light within a "warm" range drifted into pink
+  // at high lightness and neon yellow-green at high saturation.
+  // Jittering around real reference points avoids that reliably.
   const EARTH_ANCHORS = [
     [0, 50, 42],    // brick red
     [30, 50, 50],   // rust
@@ -105,15 +104,6 @@
     [44, 16, 89],   // near-cream (light outlier)
     [20, 45, 24],   // dark chocolate
   ];
-  const EXPANDED_ANCHORS = [
-    [150, 38, 46],  // teal-green
-    [180, 40, 34],  // dusty teal
-    [210, 42, 50],  // steel blue
-    [240, 38, 36],  // slate blue
-    [270, 36, 48],  // violet
-    [298, 42, 34],  // plum
-    [335, 46, 44],  // wine
-  ];
 
   function shuffled(arr) {
     const out = arr.slice();
@@ -124,32 +114,20 @@
     return out;
   }
 
-  // A tile's mirror triangle keeps the same hue as its colored partner but
-  // desaturated and lightened, so the pair reads as "the same color, two
-  // intensities" -- distinct enough to see the tile boundary, but clearly
-  // related rather than an unrelated neutral grey.
-  function mutedHsl(h, s, l) {
-    const s2 = s * 0.55;
-    const l2 = l + (88 - l) * 0.30;
-    return `hsl(${h.toFixed(1)}, ${s2.toFixed(0)}%, ${l2.toFixed(0)}%)`;
-  }
-
   function randomPalette(d) {
-    // Earth tones first, expanded hues appended only as needed -- so a
-    // low-d example (big triangles) stays purely earth-toned, and the
-    // wider hue range only shows up once there are enough tiles that pure
-    // earth tones alone would start repeating too closely to stay
-    // distinguishable once paired with a muted companion.
-    const pool = shuffled(EARTH_ANCHORS).concat(shuffled(EXPANDED_ANCHORS));
+    // Shuffle the anchor list before assigning colors, not just the
+    // finished colors afterward -- otherwise a small-d example would
+    // always draw its colors from the same fixed prefix of the list.
+    const pool = shuffled(EARTH_ANCHORS);
     const colors = [];
     for (let i = 0; i < d; i++) {
       const [h0, s0, l0] = pool[i % pool.length];
       const h = (h0 + (Math.random() - 0.5) * 10 + 360) % 360;
       const s = Math.max(8, Math.min(62, s0 + (Math.random() - 0.5) * 10));
       const l = Math.max(20, Math.min(92, l0 + (Math.random() - 0.5) * 8));
-      colors.push({ main: `hsl(${h.toFixed(1)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`, muted: mutedHsl(h, s, l) });
+      colors.push(`hsl(${h.toFixed(1)}, ${s.toFixed(0)}%, ${l.toFixed(0)}%)`);
     }
-    // Shuffle so which anchor lands on which specific tile label is
+    // Shuffle again so which anchor lands on which specific tile label is
     // independent of the (already-shuffled) pool order above.
     return shuffled(colors);
   }
@@ -251,18 +229,17 @@
       const pa = transform(geo.v.a), pb = transform(geo.v.b), pc = transform(geo.v.c);
       const pRefl = transform(reflectedRef);
       const verts = { a: pa, b: pb, c: pc };
-      const colorPair = palette[(tile.label - 1) % entry.d];
+      const color = palette[(tile.label - 1) % entry.d];
 
       const triangles = [[pa, pb, pc], [verts[u1], verts[u2], pRefl]];
-      const fills = [colorPair.main, colorPair.muted];
-      for (let i = 0; i < triangles.length; i++) {
-        const pts = triangles[i].map(toScreen);
+      for (const tri of triangles) {
+        const pts = tri.map(toScreen);
         ctx.beginPath();
         ctx.moveTo(pts[0].x, pts[0].y);
         ctx.lineTo(pts[1].x, pts[1].y);
         ctx.lineTo(pts[2].x, pts[2].y);
         ctx.closePath();
-        ctx.fillStyle = fills[i];
+        ctx.fillStyle = color;
         ctx.fill();
         ctx.stroke();
       }
