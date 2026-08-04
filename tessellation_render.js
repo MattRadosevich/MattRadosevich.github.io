@@ -28,6 +28,14 @@
     return EDGE_MAX_PX + (EDGE_MIN_PX - EDGE_MAX_PX) * t;
   }
 
+  // Manual zoom, only exposed once the info box is hidden (see
+  // wireControls). Multiplies the edge length chosen by idealEdgePx --
+  // 1.0 is "no adjustment". Clamped to a reasonable range: zooming in
+  // much past 2.5x starts showing only a handful of triangles even for
+  // high-d examples, and zooming out much past 0.4x makes individual
+  // triangles too small to read.
+  const ZOOM_MIN = 0.4, ZOOM_MAX = 2.5, ZOOM_STEP = 1.25;
+
   // Exact tile-pair (shaded+unshaded) area for each tessellation type, used
   // to estimate how many tiles a given edge length would need for a given
   // viewport, so we can back off *before* generating them rather than
@@ -43,12 +51,13 @@
     return (Math.PI * radius * radius / area) * 1.3; // headroom: BFS frontier isn't a perfect disc
   }
 
-  // Ideal edge length for this d, bumped up (bigger, fewer triangles) only
-  // if the straightforward choice would blow past the tile budget for this
-  // screen -- e.g. a d=30 example on a 4K monitor. Ordinary screens at
-  // ordinary d never get touched by this.
-  function edgePxForViewport(d, type, W, H) {
-    const ideal = idealEdgePx(d);
+  // Ideal edge length for this d and zoom level, bumped up (bigger, fewer
+  // triangles) only if the straightforward choice would blow past the
+  // tile budget for this screen -- e.g. a d=30 example zoomed out on a 4K
+  // monitor. Ordinary screens at ordinary d/zoom never get touched by
+  // this; it's purely a safety valve so zooming out can't tank performance.
+  function edgePxForViewport(d, type, W, H, zoom) {
+    const ideal = idealEdgePx(d) * zoom;
     const est = estimatedTiles(ideal, type, W, H);
     if (est <= TILE_BUDGET) return ideal;
     return ideal * Math.sqrt(est / TILE_BUDGET);
@@ -135,7 +144,7 @@
   }
 
   // ---------- main draw routine ----------
-  function draw(canvas, entry, palette, reflectChoice) {
+  function draw(canvas, entry, palette, reflectChoice, zoom) {
     // Force the positioning that makes this a full-viewport backdrop via
     // direct inline styles, rather than relying only on the external
     // stylesheet rule. Inline styles set through the DOM always win the
@@ -170,7 +179,7 @@
 
     const [a, b, c] = entry.type;
     const sigma = buildSigma(entry);
-    const EDGE_PX = edgePxForViewport(entry.d, entry.type, W, H);
+    const EDGE_PX = edgePxForViewport(entry.d, entry.type, W, H, zoom);
 
     // Screen (px, origin top-left, y-down) <-> world (unit complex plane, y-up).
     const cx = W / 2, cy = H / 2;
@@ -259,10 +268,14 @@
   // visit, not once per render call, so that resizing the window redraws
   // the *same* pattern to fit the new size rather than reshuffling
   // mid-visit. A manual shuffle (see wireControls) resets all three and
-  // re-renders.
+  // re-renders. Zoom is reset alongside them (fresh wallpaper starts at
+  // 1x) but, unlike the others, persists across toggling the info box
+  // on/off -- zooming in, then peeking at the info box, then hiding it
+  // again shouldn't lose your zoom level.
   let currentEntry = null;
   let currentPalette = null;
   let currentReflectChoice = null;
+  let currentZoom = 1;
   const REFLECT_CHOICES = ['a', 'b', 'c'];
 
   function render() {
@@ -272,12 +285,13 @@
       currentEntry = pickTriple();
       currentPalette = randomPalette(currentEntry.d);
       currentReflectChoice = REFLECT_CHOICES[Math.floor(Math.random() * REFLECT_CHOICES.length)];
+      currentZoom = 1;
     }
-    draw(canvas, currentEntry, currentPalette, currentReflectChoice);
+    draw(canvas, currentEntry, currentPalette, currentReflectChoice, currentZoom);
     writeBlurb(currentEntry);
   }
 
-  // ---------- info-box toggle + shuffle controls ----------
+  // ---------- info-box toggle + shuffle + zoom controls ----------
   // These live in their own always-present container (a sibling of the
   // info box, not nested inside it), so they stay reachable even when the
   // info box itself is hidden -- otherwise there'd be no way to bring it
@@ -286,6 +300,9 @@
     const infoBox = document.getElementById('info-box');
     const toggleLink = document.getElementById('toggle-info-link');
     const shuffleLink = document.getElementById('shuffle-link');
+    const zoomControls = document.getElementById('zoom-controls');
+    const zoomInLink = document.getElementById('zoom-in-link');
+    const zoomOutLink = document.getElementById('zoom-out-link');
 
     if (infoBox && toggleLink) {
       toggleLink.addEventListener('click', (e) => {
@@ -295,6 +312,9 @@
         toggleLink.textContent = nowHidden
           ? 'Click here to unhide personal info'
           : 'Click here to hide personal info';
+        // Zoom only makes sense as a "full screen wallpaper" feature --
+        // hide the controls again as soon as the info box comes back.
+        if (zoomControls) zoomControls.style.display = nowHidden ? 'inline' : 'none';
       });
     }
 
@@ -304,6 +324,21 @@
         currentEntry = null;
         currentPalette = null;
         currentReflectChoice = null;
+        render();
+      });
+    }
+
+    if (zoomInLink) {
+      zoomInLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentZoom = Math.min(ZOOM_MAX, currentZoom * ZOOM_STEP);
+        render();
+      });
+    }
+    if (zoomOutLink) {
+      zoomOutLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentZoom = Math.max(ZOOM_MIN, currentZoom / ZOOM_STEP);
         render();
       });
     }
