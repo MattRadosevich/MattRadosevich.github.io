@@ -310,8 +310,8 @@
         const nowHidden = infoBox.style.display !== 'none';
         infoBox.style.display = nowHidden ? 'none' : '';
         toggleLink.textContent = nowHidden
-          ? 'Click here to unhide personal info'
-          : 'Click here to hide personal info';
+          ? 'Show personal info'
+          : 'Make wallpaper fullscreen';
         // Zoom only makes sense as a "full screen wallpaper" feature --
         // hide the controls again as soon as the info box comes back.
         if (zoomControls) zoomControls.style.display = nowHidden ? 'inline' : 'none';
