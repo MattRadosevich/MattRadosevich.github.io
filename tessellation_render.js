@@ -19,7 +19,7 @@
   // climbs toward EDGE_MAX_D, triangles shrink so more of the underlying
   // structure is visible on screen at once.
   const EDGE_MIN_D = 4, EDGE_MAX_D = 30;
-  const EDGE_MAX_PX = 64, EDGE_MIN_PX = 16;
+  const EDGE_MAX_PX = 64, EDGE_MIN_PX = 32;
 
   function idealEdgePx(d) {
     if (d <= EDGE_MIN_D) return EDGE_MAX_PX;
